@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sensor-consumer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sensor-consumer
+  template:
+    metadata:
+      labels:
+        app: sensor-consumer
+    spec:
+      containers:
+      - name: consumer
+        image: heet09/consumer:v2
+        envFrom:
+        - configMapRef:
+            name: sensor-config
+        - secretRef:
+            name: sensor-secrets
