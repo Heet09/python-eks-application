@@ -11,6 +11,7 @@ env:
   PRODUCER_IMAGE_NAME: producer
   CONSUMER_IMAGE_NAME: consumer
   API_IMAGE_NAME: api
+  CLUSTER_NAME: main-cluster
 
 jobs:
   build-and-push:
@@ -48,3 +49,42 @@ jobs:
           file: ./api.Dockerfile
           push: true
           tags: ${{ env.DOCKERHUB_USERNAME }}/${{ env.API_IMAGE_NAME }}:v1
+
+  deploy:
+    needs: build-and-push
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+
+      - name: Configure kubectl
+        run: aws eks --region us-east-1 update-kubeconfig --name ${{ env.CLUSTER_NAME }}
+
+      - name: Deploy to Kubernetes
+        run: |
+          kubectl apply -f k8s/configmap.yaml
+          kubectl apply -f ks8/secret.yaml
+          kubectl apply -f k8s/producer-deployment.yaml
+          kubectl apply -f k8s/consumer-deployment.yaml
+          kubectl apply -f k8s/api.yaml
+
