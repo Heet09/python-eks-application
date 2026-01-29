@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sensor-config
+data:
+  KAFKA_BOOTSTRAP_SERVERS: "b-1.mainmskcluster.88hock.c8.kafka.us-east-1.amazonaws.com:9092,b-2.mainmskcluster.88hock.c8.kafka.us-east-1.amazonaws.com:9092"
+  DB_HOST: "terraform-20250912133517738900000006.cilg8wg4w02s.us-east-1.rds.amazonaws.com"                            # Replace with RDS endpoint
+  DB_NAME: "sensor_db"
+  DB_USER: "postgres"
+  DB_PORT: "5432"

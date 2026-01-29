@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sensor-producer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sensor-producer
+  template:
+    metadata:
+      labels:
+        app: sensor-producer
+    spec:
+      containers:
+      - name: producer
+        image: heet09/producer:v1
+        envFrom:
+        - configMapRef:
+            name: sensor-config
+        - secretRef:
+            name: sensor-secrets

@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sensor-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sensor-api
+  template:
+    metadata:
+      labels:
+        app: sensor-api
+    spec:
+      containers:
+      - name: api
+        image: heet09/api:v1
+        ports:
+        - containerPort: 5000
+        envFrom:
+        - configMapRef:
+            name: sensor-config
+        - secretRef:
+            name: sensor-secrets
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sensor-api-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: sensor-api
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 5000
